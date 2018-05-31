@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Student;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class StudentController extends Controller
+class AttendanceDetailMany extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -24,6 +27,7 @@ class StudentController extends Controller
     public function create()
     {
         //
+
     }
 
     /**
@@ -34,6 +38,12 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
+        $now = Carbon::now();
+        $stuPresent = json_decode($request ->get('stuPresent'));
+        foreach ($stuPresent as $key => $value) {
+            DB::table('attendance_details')->where('student_id', $value)->update(['status' => 1, 'created_at' => $now]);
+        }
+        return response() ->json(['result' => true]);
         //
     }
 

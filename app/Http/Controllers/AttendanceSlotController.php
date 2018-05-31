@@ -16,11 +16,14 @@ class AttendanceSlotController extends Controller
      */
     public function index()
     {
+
         $now = Carbon::now();
         $attSlot = DB::table('attendance_slots')
             ->join('time_slots', 'attendance_slots.time_slot_id', '=', 'time_slots.id')
+            ->select('attendance_slots.id', 'attendance_slots.time_slot_id', 'attendance_slots.subject', 'time_slots.time')
             ->get();
         return view('attendance_slot') ->with('list_slot', $attSlot)-> with('time', $now->toDateString());
+
     }
 
     /**
@@ -52,12 +55,20 @@ class AttendanceSlotController extends Controller
      */
     public function show($id)
     {
-        $attSlot = DB::table('attendance_slots')->where('attendance_slots.id', $id)
+        $now = Carbon::now();
+        $list_student = DB::table('attendance_slots')->where('attendance_slots.id', $id)
             ->join('student_classes', 'attendance_slots.class_id', '=', 'student_classes.class_id')
             ->join('students', 'students.id', '=', 'student_classes.student_id')
             ->get();
 
-        return view('attendance_detail') -> with( 'list_student',  $attSlot);
+        foreach ($list_student as $student) {
+            if( DB::table('attendance_details')->where('attendance_slot', $id) ->where('student_id', $student->id) -> exists()) continue;
+            DB::table('attendance_details')->insert(['attendance_slot' => $id, 'student_id' => $student->id, 'status' => 0, 'created_at' => $now]);
+        }
+        $attenDetail = DB::table('attendance_details') -> where('attendance_slot', $id)
+            ->join('students', 'attendance_details.student_id', '=', 'students.id')
+            ->get();
+        return view('attendance_detail') -> with( 'list_student',  $attenDetail) ->with('attrSlot', $id);
     }
 
     /**

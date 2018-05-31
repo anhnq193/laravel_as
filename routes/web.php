@@ -17,3 +17,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::resource('/v1/timeslot', 'AttendanceSlotController');
+Route::resource('/v1/attendance-detail/many', 'AttendanceDetailMany');
